@@ -309,6 +309,19 @@ escreve_aux([H|T]) :-
 %---------------------------------------------------------------------
 % tira_num_aux(Num,Puz,Pos,N_Puz) significa que N_Puz é o puzzle resultante de
 % tirar o número Num da posição Pos do puzzle Puz.
+% Pos -> (L,C)
 %---------------------------------------------------------------------
-tira_num_aux(Num,Puz,(L,C),N_Puz):-puzzle_ref(Puz, (L, C), Cont)
+tira_num_aux(Num,Puz,(L,C),N_Puz):-
+        puzzle_ref(Puz, (L, C), Cont), 
+        delete(Cont, Num, Changed),
+        puzzle_muda(Puz, (L,C), Changed, N_Puz).
 
+
+
+%---------------------------------------------------------------------
+% tira_num(Num,Puz,Posicoes,N_Puz) significa que N_Puz é o puzzle resultante de
+% tirar o número Num de todas as posições em Posicoes do puzzle Puz.
+% 
+%---------------------------------------------------------------------
+
+tira_num(Num,Puz,Posicoes,N_Puz):- percorre_muda_Puz(Puz,,Posicoes,N_Puz).
