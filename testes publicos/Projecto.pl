@@ -23,4 +23,3 @@ tira_num_aux(Num,Puz,(L,C),N_Puz):-
 %---------------------------------------------------------------------
 
 tira_num(Num,Puz,Posicoes,N_Puz):- percorre_muda_Puz(Puz,tira_num_aux(Num),Posicoes,N_Puz).
-
