@@ -107,9 +107,77 @@ inicializa(Puz,N_Puz):-
 so_aparece_uma_vez(Puz,Num,[H_Posicoes|_],H_Posicoes):-
         puzzle_ref(Puz,H_Posicoes,[Cont]),%vai buscar o el do sudoku
         Cont == Num,!.%Se o Cont tiver apenas o Num,acaba e nao procura mais
-        %so_aparece_uma_vez(Puz,Num,T_Posicoes,T_Pos_Num).%nao procura mais e mete a posicao e ve o prox
-
+        
 so_aparece_uma_vez(Puz,Num,[_|T_Posicoes],Pos_Num):-%se nao so tiver o Num
         so_aparece_uma_vez(Puz,Num,T_Posicoes,Pos_Num).%ve o prox
 
+
+
+%inspecciona_num(Posicoes,Puz,Num,N_Puz) significa que N_Puz é o resultado
+%de inspeccionar o grupo cujas posições são Posicoes, para o número Num:
+%se Num só ocorrer numa das posições de Posicoes e se o conteúdo dessa posição
+%não for uma lista unitária, esse conteúdo é mudado para [Num] e esta mudança é
+%propagada;
+%caso contrário, Puz = N_Puz.
+
+%Se nao encontramos nenhum nr, igualamos Puz a N_puz
+inspecciona_num([],Puz,_,N_Puz):-N_Puz=Puz,!.%tb nao vemos mais ramos
+
+%Caso N_puz ja tava definido,
+inspecciona_num([],_,_,_):-!.%retornamos o N_Puz e nao ve mais ramos
+
+
+
+%se o elemento for unitario, Podemos evitar propagar desnecessariamente
+inspecciona_num([H_Posicoes|T_Posicoes],Puz,Num,N_Puz):-
+        puzzle_ref(Puz,H_Posicoes,Cont),%Vamos buscar o el do sudoku
+        e_lista_unitario(Cont),!,%se o conteudo for unitario,bloqueia o ramo e
+        inspecciona_num(T_Posicoes,Puz,Num,N_Puz).%ve o prox,poupando calcumos desnecessarios
+
+
+%se o Numero existir na posicao a verificar,e nao for unitario
+inspecciona_num([H_Posicoes|T_Posicoes],Puz,Num,N_Puz):-
+        puzzle_ref(Puz,H_Posicoes,Cont),%Vamos buscar o el do sudoku
+        member(Num,Cont),%se o num esta no Cont
+        puzzle_muda_propaga(Puz,H_Posicoes,[Num],N_Puz),%altera o Conteudo da posicao para num, e propaga
+        inspecciona_num(T_Posicoes,Puz,Num,N_Puz),!.%verifica o proximo para se ter a certeza q nao existe mais,
+        %tem o corte para caso resultar o puzzle_muda_propaga, nao procura a hipotese q queremos q de quando falha
+
+%se o Numero nao for membro do Cont
+inspecciona_num([H_Posicoes|T_Posicoes],Puz,Num,N_Puz):-
+        puzzle_ref(Puz,H_Posicoes,Cont),%Vamos buscar o el do sudoku
+        \+ member(Num,Cont),!,%se o num nao esta no Cont,bloqueia o ramo
+        inspecciona_num(T_Posicoes,Puz,Num,N_Puz).%ve o proximo
+
+%se existia outro elemento q continha o num, da erro no puzzle propaga
+inspecciona_num(_,Puz,_,Puz).%Retorna Puz
+
+
+
+%inspecciona_grupo(Puz,Gr,N_Puz) inspecciona o grupo cujas posições são as da
+%lista Gr, do puzzle Puz para cada um dos números possíveis, sendo o resultado o puzzle
+%N_Puz.
+
+%inspecciona_grupo(Puz_Changed,[],Puz_Changed).%Quando chegamos ao fim retornamos o puzzle final
+
+inspecciona_grupo(Puz,Gr,N_Puz):-
+        numeros(N),%arranjamos todos os numeros a testar
+        inspecciona_grupo_nrs(Puz,Gr,N_Puz,N).%testamos o grupo com todos os nrs
+        
+
+%funcao aux q chama o inspecciona_num para todos os nrs da lista N
+
+inspecciona_grupo_nrs(Puz,Posicoes,N_Puz,[H_N]):-
+        inspecciona_num(Posicoes,Puz,H_N,N_Puz),!.%quando cheagar ao fim faz o ultimo
+
+inspecciona_grupo_nrs(Puz,Posicoes,N_Puz,[H_N|T_N]):-
+        inspecciona_num(Posicoes,Puz,H_N,Puz_Changed),%manda o 1 nr
+        inspecciona_grupo_nrs(Puz_Changed,Posicoes,N_Puz,T_N).%ve o proximo
+
+%inspecciona(Puz,N_Puz) inspecciona cada um dos grupos do puzzle Puz, para cada
+%um dos números possíveis, sendo o resultado o puzzle N_Puz
+
+inspecciona(Puz,N_Puz):-
+        grupos(Gr),%arranja o grupo
+        percorre_muda_Puz(Puz,inspecciona_grupo,Gr,N_Puz).%percorre cada um dos grupos para o inspeciona grupo
 
