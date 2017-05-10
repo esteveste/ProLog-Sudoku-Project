@@ -77,10 +77,29 @@ poss_aux([H_Conteudos|T_Conteudos],N):-
 
 poss_aux([H_Conteudos|T_Conteudos],N):-
         member(A,H_Conteudos),%se o numero de H_Cont
-        \+ member(A,N),%nao ta em N,pk ja tiramos a poss
+        \+ member(A,N),!,%nao ta em N,pk ja tiramos a poss
         poss_aux(T_Conteudos,N).%ve o prox
 
 
+%inicializa_aux(Puz,Pos,N_Puz) significa que N_Puz é o puzzle resultante de colocar
+%na posição Pos do puzzle Puz a lista com os números possíveis para essa posição.
+%Note que, se o conteúdo da posição Pos de Puz já for uma lista unitária, nada é alterado.
 
+inicializa_aux(Puz,Pos,Puz):-
+        puzzle_ref(Puz,Pos,Cont),%vai buscar o elemento
+        e_lista_unitario(Cont),!.%se for unitario, nao muda
 
+inicializa_aux(Puz,Pos,N_Puz):-%se o local a alterar nao for unitario
+        possibilidades(Pos,Puz,Poss),%ve a possibilidade
+        puzzle_muda_propaga(Puz,Pos,Poss,N_Puz).%muda e propaga caso for unitario
 
+%inicializa(Puz,N_Puz) significa que N_Puz é o puzzle resultante de inicializar o
+%puzzle Puz.
+
+inicializa(Puz,N_Puz):-
+        todas_posicoes(Todas_Posicoes),
+        percorre_muda_Puz(Puz,inicializa_aux,Todas_Posicoes,N_Puz).
+
+%so_aparece_uma_vez(Puz,Num,Posicoes,Pos_Num) significa que o número Num
+%só aparece numa das posições da lista Posicoes do puzzle Puz, e que essa posição é
+%Pos_Num.
