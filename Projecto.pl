@@ -38,15 +38,15 @@ puzzle_muda_propaga(Puz,Pos,Cont,Puz):-
         Cont == Cont1,!.%e igual se for nao substitui
 
 puzzle_muda_propaga(Puz, Pos, [Cont], N_Puz):-
-        e_lista_unitario([Cont]),!,%verifica se Cont e unitario nao verifica mais hipoteses
-        puzzle_muda(Puz, Pos, [Cont], Puz_Muda),%altera o local do puz por Cont
+        %e_lista_unitario([Cont]),!,%verifica se Cont e unitario nao verifica mais hipoteses
+        !,puzzle_muda(Puz, Pos, [Cont], Puz_Muda),%altera o local do puz por Cont
         posicoes_relacionadas(Pos,PosRel),%arranja as posicoes relacionadas a Pos
         tira_num(Cont,Puz_Muda,PosRel,N_Puz).
         
 
 
 puzzle_muda_propaga(Puz,Pos,Cont,N_Puz):-
-        \+ e_lista_unitario(Cont),%se o resto dos argumentos nao for vazio, ent n e unitario
+        %\+ e_lista_unitario(Cont),%se o resto dos argumentos nao for vazio, ent n e unitario
         puzzle_muda(Puz,Pos,Cont,N_Puz).%muda
 
 
@@ -61,24 +61,24 @@ e_lista_unitario([_|T]):-
 %posições cujo conteúdo não é uma sequência unitária
 
 possibilidades(Pos,Puz,Poss):-
-        numeros(Poss),%lista de nr possiveis nrs no sudoku
+        numeros(N),%lista de nr possiveis nrs no sudoku
         posicoes_relacionadas(Pos,PosRel),%arranja as pos relacionadas
         conteudos_posicoes(Puz,PosRel,Conteudos),%arranja os elementos do sudoku relacionadas com a posicao 
-        poss_aux(Conteudos,Poss).%vai calcular as possibilidades
+        poss_aux(Conteudos,N,Poss).%vai calcular as possibilidades
 
-poss_aux([[]|T_Conteudos],N):-!,%caso a lista for vazia, nao procura mais ramos
-        poss_aux(T_Conteudos,N).%ve o proximo
-poss_aux([],_):-!.%se chegamos ao fim n ve mais
-poss_aux([H_Conteudos|T_Conteudos],N):-
+poss_aux([[]|T_Conteudos],N,Poss):-!,%caso a lista for vazia, nao procura mais ramos
+        poss_aux(T_Conteudos,N,Poss).%ve o proximo
+poss_aux([],N,N):-!.%se chegamos ao fim, retorna e n ve mais
+poss_aux([H_Conteudos|T_Conteudos],N,Poss):-
         member(A,H_Conteudos),%se o nr pertence a  H_N
         member(A,N),!,%e a Numeros, nao procuramos mais hipoteses e
         delete(N, A, N_Changed),%removemos a possibilidade
-        poss_aux([H_Conteudos|T_Conteudos],N_Changed).%vemos se existem mais elementos q pertencem aos 2
+        poss_aux([H_Conteudos|T_Conteudos],N_Changed,Poss).%vemos se existem mais elementos q pertencem aos 2
 
-poss_aux([H_Conteudos|T_Conteudos],N):-
+poss_aux([H_Conteudos|T_Conteudos],N,Poss):-
         member(A,H_Conteudos),%se o numero de H_Cont
-        \+ member(A,N),!,%nao ta em N,pk ja tiramos a poss
-        poss_aux(T_Conteudos,N).%ve o prox
+        \+ member(A,N),!,%nao ta em N,pk ja tiramos a poss,nao ve mais hipoteses nos members
+        poss_aux(T_Conteudos,N,Poss).%ve o prox
 
 
 %inicializa_aux(Puz,Pos,N_Puz) significa que N_Puz é o puzzle resultante de colocar
@@ -103,3 +103,14 @@ inicializa(Puz,N_Puz):-
 %so_aparece_uma_vez(Puz,Num,Posicoes,Pos_Num) significa que o número Num
 %só aparece numa das posições da lista Posicoes do puzzle Puz, e que essa posição é
 %Pos_Num.
+
+
+so_aparece_uma_vez(Puz,Num,[H_Posicoes|_],H_Posicoes):-
+        puzzle_ref(Puz,H_Posicoes,[Cont]),%vai buscar o el do sudoku
+        Cont == Num,!.%Se o Cont tiver apenas o Num,acaba e nao procura mais
+        %so_aparece_uma_vez(Puz,Num,T_Posicoes,T_Pos_Num).%nao procura mais e mete a posicao e ve o prox
+
+so_aparece_uma_vez(Puz,Num,[_|T_Posicoes],Pos_Num):-%se nao so tiver o Num
+        so_aparece_uma_vez(Puz,Num,T_Posicoes,Pos_Num).%ve o prox
+
+
