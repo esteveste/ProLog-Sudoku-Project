@@ -70,14 +70,13 @@ poss_aux([[]|T_Conteudos],N,Poss):-!,%caso a lista for vazia, nao procura mais r
         poss_aux(T_Conteudos,N,Poss).%ve o proximo
 poss_aux([],N,N):-!.%se chegamos ao fim, retorna e n ve mais
 poss_aux([H_Conteudos|T_Conteudos],N,Poss):-
-        member(A,H_Conteudos),%se o nr pertence a  H_N
-        member(A,N),!,%e a Numeros, nao procuramos mais hipoteses e
-        delete(N, A, N_Changed),%removemos a possibilidade
-        poss_aux([H_Conteudos|T_Conteudos],N_Changed,Poss).%vemos se existem mais elementos q pertencem aos 2
+        e_lista_unitario(H_Conteudos),!,%se for unitario, nao procura mais na arvore
+        member(A,H_Conteudos),%arranja o nr
+        delete(N, A, N_Changed),%removemos a possibilidade do nr
+        poss_aux(T_Conteudos,N_Changed,Poss).%vemos se existem mais elementos q pertencem aos 2
 
 poss_aux([H_Conteudos|T_Conteudos],N,Poss):-
-        member(A,H_Conteudos),%se o numero de H_Cont
-        \+ member(A,N),!,%nao ta em N,pk ja tiramos a poss,nao ve mais hipoteses nos members
+        \+ e_lista_unitario(H_Conteudos),%se nao for unitario
         poss_aux(T_Conteudos,N,Poss).%ve o prox
 
 
