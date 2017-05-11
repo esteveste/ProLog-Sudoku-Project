@@ -6,8 +6,8 @@
 :- include('SUDOKU').
 
 %---------------------------------------------------------------------
-% tira_num_aux(Num,Puz,Pos,N_Puz) significa que N_Puz é o puzzle resultante de
-% tirar o número Num da posição Pos do puzzle Puz.
+% tira_num_aux(Num,Puz,Pos,N_Puz) significa que N_Puz e o puzzle resultante de
+% tirar o numero Num da posicao Pos do puzzle Puz.
 % Pos -> (L,C)
 %---------------------------------------------------------------------
 tira_num_aux(Num,Puz,Pos,N_Puz):-
@@ -18,8 +18,8 @@ tira_num_aux(Num,Puz,Pos,N_Puz):-
 
 
 %---------------------------------------------------------------------
-% tira_num(Num,Puz,Posicoes,N_Puz) significa que N_Puz é o puzzle resultante de
-% tirar o número Num de todas as posições em Posicoes do puzzle Puz.
+% tira_num(Num,Puz,Posicoes,N_Puz) significa que N_Puz e o puzzle resultante de
+% tirar o numero Num de todas as posicoes em Posicoes do puzzle Puz.
 %
 %---------------------------------------------------------------------
 
@@ -28,9 +28,9 @@ tira_num(Num,Puz,Posicoes,N_Puz):-
 
 
 %puzzle_muda_propaga(Puz, Pos, Cont, N_Puz) faz o mesmo que o predicado
-%puzzle_muda/4, mas, no caso de Cont ser uma lista unitária, propaga a mudança, isto
-%é, retira o número em Cont de todas as posições relacionadas com Pos, isto é, todas as
-%posições na mesma linha, coluna ou bloco.
+%puzzle_muda/4, mas, no caso de Cont ser uma lista unitaria, propaga a mudanca, isto
+%e, retira o numero em Cont de todas as posicoes relacionadas com Pos, isto e, todas as
+%posicoes na mesma linha, coluna ou bloco.
 
 
 %base
@@ -57,9 +57,9 @@ e_lista_unitario([_|T]):-
         T == [].
 
 
-%possibilidades(Pos,Puz,Poss) significa que Poss é a lista de números possíveis
-%para a posição Pos, do puzzle Puz. Nota: este predicado apenas deve ser usado para
-%posições cujo conteúdo não é uma sequência unitária
+%possibilidades(Pos,Puz,Poss) significa que Poss e a lista de numeros possiveis
+%para a posicao Pos, do puzzle Puz. Nota: este predicado apenas deve ser usado para
+%posicoes cujo conteudo nao e uma sequencia unitaria
 
 possibilidades(Pos,Puz,Poss):-
         numeros(N),%lista de nr possiveis nrs no sudoku
@@ -81,9 +81,9 @@ poss_aux([H_Conteudos|T_Conteudos],N,Poss):-
         poss_aux(T_Conteudos,N,Poss).%ve o prox
 
 
-%inicializa_aux(Puz,Pos,N_Puz) significa que N_Puz é o puzzle resultante de colocar
-%na posição Pos do puzzle Puz a lista com os números possíveis para essa posição.
-%Note que, se o conteúdo da posição Pos de Puz já for uma lista unitária, nada é alterado.
+%inicializa_aux(Puz,Pos,N_Puz) significa que N_Puz e o puzzle resultante de colocar
+%na posicao Pos do puzzle Puz a lista com os numeros possiveis para essa posicao.
+%Note que, se o conteudo da posicao Pos de Puz ja for uma lista unitaria, nada e alterado.
 
 inicializa_aux(Puz,Pos,Puz):-
         puzzle_ref(Puz,Pos,Cont),%vai buscar o elemento
@@ -93,43 +93,33 @@ inicializa_aux(Puz,Pos,N_Puz):-%se o local a alterar nao for unitario
         possibilidades(Pos,Puz,Poss),%ve a possibilidade
         puzzle_muda_propaga(Puz,Pos,Poss,N_Puz).%muda e propaga caso for unitario
 
-%inicializa(Puz,N_Puz) significa que N_Puz é o puzzle resultante de inicializar o
+%inicializa(Puz,N_Puz) significa que N_Puz e o puzzle resultante de inicializar o
 %puzzle Puz.
 
 inicializa(Puz,N_Puz):-
         todas_posicoes(Todas_Posicoes),
         percorre_muda_Puz(Puz,inicializa_aux,Todas_Posicoes,N_Puz).
 
-%so_aparece_uma_vez(Puz,Num,Posicoes,Pos_Num) significa que o número Num
-%só aparece numa das posições da lista Posicoes do puzzle Puz, e que essa posição é
+%so_aparece_uma_vez(Puz,Num,Posicoes,Pos_Num) significa que o numero Num
+%so aparece numa das posicoes da lista Posicoes do puzzle Puz, e que essa posicao e
 %Pos_Num.
 
-so_aparece_uma_vez(_,_,[],_):-!.%se chegamos ao fim acaba
 
-so_aparece_uma_vez(Puz,Num,[H_Posicoes|T_Posicoes],H_Posicoes):-
-        puzzle_ref(Puz,H_Posicoes,Cont),%vai buscar o el do sudoku
-        member(Num,Cont),!,%ve se o nr esta no elemento, e nao ve mais no member
-        so_aparece_uma_vez(Puz,Num,T_Posicoes,H_Posicoes).%chama o prox, pois se existir outro elemento com o nr da erro
+so_aparece_uma_vez(Puz,Num,[H_Posicoes|_],H_Posicoes):-
+        puzzle_ref(Puz,H_Posicoes,[Cont]),%vai buscar o el do sudoku
+        Cont == Num,!.%Se o Cont tiver apenas o Num,acaba e nao procura mais
         
-        
-        
-        
-        
-        %Cont == Num,!.%Se o Cont tiver apenas o Num,acaba e nao procura mais
-        
-so_aparece_uma_vez(Puz,Num,[H_Posicoes|T_Posicoes],Pos_Num):-%se nao so tiver o Num,isto e 
-        puzzle_ref(Puz,H_Posicoes,Cont),%vai buscar o el do sudoku
-        \+ member(Num,Cont),%se nao for membro
+so_aparece_uma_vez(Puz,Num,[_|T_Posicoes],Pos_Num):-%se nao so tiver o Num
         so_aparece_uma_vez(Puz,Num,T_Posicoes,Pos_Num).%ve o prox
 
 
 
-%inspecciona_num(Posicoes,Puz,Num,N_Puz) significa que N_Puz é o resultado
-%de inspeccionar o grupo cujas posições são Posicoes, para o número Num:
-%se Num só ocorrer numa das posições de Posicoes e se o conteúdo dessa posição
-%não for uma lista unitária, esse conteúdo é mudado para [Num] e esta mudança é
+%inspecciona_num(Posicoes,Puz,Num,N_Puz) significa que N_Puz e o resultado
+%de inspeccionar o grupo cujas posicoes sao Posicoes, para o numero Num:
+%se Num so ocorrer numa das posicoes de Posicoes e se o conteudo dessa posicao
+%nao for uma lista unitaria, esse conteudo e mudado para [Num] e esta mudanca e
 %propagada;
-%caso contrário, Puz = N_Puz.
+%caso contrario, Puz = N_Puz.
 
 %Se nao encontramos nenhum nr, igualamos Puz a N_puz
 inspecciona_num([],Puz,_,N_Puz):-N_Puz=Puz,!.%tb nao vemos mais ramos
@@ -165,8 +155,8 @@ inspecciona_num(_,Puz,_,Puz).%Retorna Puz
 
 
 
-%inspecciona_grupo(Puz,Gr,N_Puz) inspecciona o grupo cujas posições são as da
-%lista Gr, do puzzle Puz para cada um dos números possíveis, sendo o resultado o puzzle
+%inspecciona_grupo(Puz,Gr,N_Puz) inspecciona o grupo cujas posicoes sao as da
+%lista Gr, do puzzle Puz para cada um dos numeros possiveis, sendo o resultado o puzzle
 %N_Puz.
 
 %inspecciona_grupo(Puz_Changed,[],Puz_Changed).%Quando chegamos ao fim retornamos o puzzle final
@@ -186,15 +176,15 @@ inspecciona_grupo_nrs(Puz,Posicoes,N_Puz,[H_N|T_N]):-
         inspecciona_grupo_nrs(Puz_Changed,Posicoes,N_Puz,T_N).%ve o proximo
 
 %inspecciona(Puz,N_Puz) inspecciona cada um dos grupos do puzzle Puz, para cada
-%um dos números possíveis, sendo o resultado o puzzle N_Puz
+%um dos numeros possiveis, sendo o resultado o puzzle N_Puz
 
 inspecciona(Puz,N_Puz):-
         grupos(Gr),%arranja o grupo
         percorre_muda_Puz(Puz,inspecciona_grupo,Gr,N_Puz).%percorre cada um dos grupos para o inspeciona grupo
 
-%grupo_correcto(Puz,Nums,Gr), em que Puz é um puzzle, significa que o grupo de
-%Puz cujas posições são as da lista Gr está correcto, isto é, que contém todos os números
-%da lista Nums, sem repetições.
+%grupo_correcto(Puz,Nums,Gr), em que Puz e um puzzle, significa que o grupo de
+%Puz cujas posicoes sao as da lista Gr esta correcto, isto e, que contem todos os numeros
+%da lista Nums, sem repeticoes.
 
 grupo_correcto(Puz,Nums,Gr):-
         conteudos_posicoes(Puz,Gr,Conteudos),%vamos buscar os elementos no sudoku das posicoes
@@ -212,8 +202,8 @@ grupo_correcto_aux(Nums,[H_Cont|T_Cont]):-
         grupo_correcto_aux(Nums1,T_Cont).%Ve o Prox
 
 
-%solucao(Puz) significa que o puzzle Puz é uma solução, isto é, que todos os seus grupos
-%contêm todos os números possíveis, sem repetições.
+%solucao(Puz) significa que o puzzle Puz e uma solucao, isto e, que todos os seus grupos
+%contem todos os numeros possiveis, sem repeticoes.
 
 solucao(Puz):-
         numeros(N),%arranjamos os numeros possiveis no puzzle
@@ -227,10 +217,10 @@ solucao_aux(Puz,N,[H_Gr|T_Gr]):-
         solucao_aux(Puz,N,T_Gr).%chama o proximo grupo
 
 
-%resolve(Puz,Sol) significa que o puzzle Sol é (um)a solução do puzzle Puz. Na
-%obtenção da solução, deve ser utilizado o algoritmo apresentado na Secção 1: inicializar
-%o puzzle, inspeccionar linhas, colunas e blocos, e só então procurar uma solução, tal como
-%descrito na Secção 1.4.
+%resolve(Puz,Sol) significa que o puzzle Sol e (um)a solucao do puzzle Puz. Na
+%obtencao da solucao, deve ser utilizado o algoritmo apresentado na Seccao 1: inicializar
+%o puzzle, inspeccionar linhas, colunas e blocos, e so entao procurar uma solucao, tal como
+%descrito na Seccao 1.4.
 
 resolve(Puz,Sol):-
         inicializa(Puz,Puz_Init),%comecamos por inicializar o puzzle
