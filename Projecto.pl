@@ -1,5 +1,6 @@
 ﻿%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Projecto de LP
+% Bernardo Esteves - 87633
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- include('SUDOKU').
@@ -181,3 +182,47 @@ inspecciona(Puz,N_Puz):-
         grupos(Gr),%arranja o grupo
         percorre_muda_Puz(Puz,inspecciona_grupo,Gr,N_Puz).%percorre cada um dos grupos para o inspeciona grupo
 
+%grupo_correcto(Puz,Nums,Gr), em que Puz é um puzzle, significa que o grupo de
+%Puz cujas posições são as da lista Gr está correcto, isto é, que contém todos os números
+%da lista Nums, sem repetições.
+
+grupo_correcto(Puz,Nums,Gr):-
+        conteudos_posicoes(Puz,Gr,Conteudos),%vamos buscar os elementos no sudoku das posicoes
+        flatten(Conteudos,Cont_Flat),%tiramos a lista de listas e metemos os numeros das posicoes numa unica lista
+        grupo_correcto_aux(Nums,Cont_Flat).%chama a funcao auxliar com os nrs das posicoes
+
+
+
+        
+grupo_correcto_aux([],[]):-!.%se chegou ao fim acaba,a Lista Nums tb tem de ser vazia
+
+grupo_correcto_aux(Nums,[H_Cont|T_Cont]):-
+        member(H_Cont,Nums),!,%se o numero estiver nos numeros possiveis, nao procura nos outros elementos
+        delete(Nums,H_Cont,Nums1),%e apaga esse nr da lista de Nums, de modo a q nao possam existir 2 nrs repetidos
+        grupo_correcto_aux(Nums1,T_Cont).%Ve o Prox
+
+
+%solucao(Puz) significa que o puzzle Puz é uma solução, isto é, que todos os seus grupos
+%contêm todos os números possíveis, sem repetições.
+
+solucao(Puz):-
+        numeros(N),%arranjamos os numeros possiveis no puzzle
+        grupos(Gr),%arranjamos os grupos do puzzle
+        solucao_aux(Puz,N,Gr).%vamos varrer cada um dos grupos para o grupo correcto
+
+solucao_aux(_,_,[]):-!.%se chagamos ao fim acaba
+
+solucao_aux(Puz,N,[H_Gr|T_Gr]):-
+        grupo_correcto(Puz,N,H_Gr),%ve o grupo
+        solucao_aux(Puz,N,T_Gr).%chama o proximo grupo
+
+
+%resolve(Puz,Sol) significa que o puzzle Sol é (um)a solução do puzzle Puz. Na
+%obtenção da solução, deve ser utilizado o algoritmo apresentado na Secção 1: inicializar
+%o puzzle, inspeccionar linhas, colunas e blocos, e só então procurar uma solução, tal como
+%descrito na Secção 1.4.
+
+resolve(Puz,Sol):-
+        inicializa(Puz,Puz_Init),%comecamos por inicializar o puzzle
+        inspecciona(Puz_Init,Sol),%inspecciona
+        solucao(Sol).%ve se e solucao
