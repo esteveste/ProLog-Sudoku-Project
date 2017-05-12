@@ -125,34 +125,11 @@ so_aparece_uma_vez(Puz,Num,[H_Posicoes|T_Posicoes],Pos_Num):-%se nao contiver o 
 %caso contrário, Puz = N_Puz.
 %---------------------------------------------------------------------
 
-%Se nao encontramos nenhum nr, igualamos Puz a N_puz
-inspecciona_num([],Puz,_,N_Puz):-N_Puz=Puz,!.%tb nao vemos mais ramos
+inspecciona_num(Posicoes,Puz,Num,N_Puz):-
+        so_aparece_uma_vez(Puz,Num,Posicoes,Pos_Num),!,%se o numero so aparece uma vez no grupo,obtemos a posicao,bloqueamos o ramo
+        puzzle_muda_propaga(Puz,Pos_Num,[Num],N_Puz).%e propagamos o nr
 
-%Caso N_puz ja tava definido,
-inspecciona_num([],_,_,_):-!.%retornamos o N_Puz e nao ve mais ramos
-
-%se o elemento for unitario, Podemos evitar propagar desnecessariamente
-inspecciona_num([H_Posicoes|T_Posicoes],Puz,Num,N_Puz):-
-        puzzle_ref(Puz,H_Posicoes,Cont),%Vamos buscar o el do sudoku
-        e_lista_unitario(Cont),!,%se o conteudo for unitario,bloqueia o ramo e
-        inspecciona_num(T_Posicoes,Puz,Num,N_Puz).%ve o prox,poupando calcumos desnecessarios
-
-%se o Numero existir na posicao a verificar,e nao for unitario
-inspecciona_num([H_Posicoes|T_Posicoes],Puz,Num,N_Puz):-
-        puzzle_ref(Puz,H_Posicoes,Cont),%Vamos buscar o el do sudoku
-        member(Num,Cont),%se o num esta no Cont
-        puzzle_muda_propaga(Puz,H_Posicoes,[Num],N_Puz),%altera o Conteudo da posicao para num, e propaga
-        inspecciona_num(T_Posicoes,Puz,Num,N_Puz),!.%verifica o proximo para se ter a certeza q nao existe mais,
-        %tem o corte para caso resultar o puzzle_muda_propaga, nao procura a hipotese q queremos q de quando falha
-
-%se o Numero nao for membro do Cont
-inspecciona_num([H_Posicoes|T_Posicoes],Puz,Num,N_Puz):-
-        puzzle_ref(Puz,H_Posicoes,Cont),%Vamos buscar o el do sudoku
-        \+ member(Num,Cont),!,%se o num nao esta no Cont,bloqueia o ramo
-        inspecciona_num(T_Posicoes,Puz,Num,N_Puz).%ve o proximo
-
-%se existia outro elemento q continha o num, da erro no puzzle propaga
-inspecciona_num(_,Puz,_,Puz).%Retorna Puz
+inspecciona_num(_,Puz,_,Puz).%Caso contrario devolvemos o Puz
 
 %---------------------------------------------------------------------
 %inspecciona_grupo(Puz,Gr,N_Puz) inspecciona o grupo cujas posições são as da
