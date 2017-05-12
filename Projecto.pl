@@ -13,7 +13,7 @@
 tira_num_aux(Num,Puz,Pos,N_Puz):-
         puzzle_ref(Puz, Pos, Cont),%vai buscar o quadrado do sudoku
         delete(Cont, Num, Changed),%tira as possibilidades do Num do quadrado
-        puzzle_muda_propaga(Puz,Pos, Changed, N_Puz).%substitui no puz final
+        puzzle_muda_propaga(Puz,Pos,Changed,N_Puz).%substitui no puz final
 
 
 
@@ -234,5 +234,44 @@ solucao_aux(Puz,N,[H_Gr|T_Gr]):-
 
 resolve(Puz,Sol):-
         inicializa(Puz,Puz_Init),%comecamos por inicializar o puzzle
-        inspecciona(Puz_Init,Sol),%inspecciona
+        resolve_inspeciona(Puz_Init,Puz_Insp),%depois inspecionamos ate nao ser possivel mais
+        todas_posicoes(Todas_Posicoes),%vamos buscar todas as posicoes possiveis no sudoku
+        resolve_n_unitarios(Puz_Insp,Todas_Posicoes,Sol),%se ainda existiram nao unitarios, vamos tentar substituir por 1 das poss
         solucao(Sol).%ve se e solucao
+
+%%
+resolve_n_unitarios(Puz_Insp,[],Puz_Insp):-!.%se chegamos ao fim devolve a lista
+
+resolve_n_unitarios(Puz_Insp,[H_Posicao|_],Sol):-
+        puzzle_ref(Puz_Insp, H_Posicao, Cont),%vai buscar o quadrado do sudoku
+        \+ e_lista_unitario(Cont),!,%se nao for unitario, nao ve a funcao seguinte
+        resolve_n_unitarios_nr(Puz_Insp,H_Posicao,Cont,Sol),!.%e vamos tentar escolher um dos numeros das possibilidades,
+        % e se a funcao retornar nao vericamos mais
+
+resolve_n_unitarios(Puz_Insp,[_|T_Posicao],Sol):-
+        %caso e unitario
+        resolve_n_unitarios(Puz_Insp,T_Posicao,Sol).%ve o seguinte
+
+%%
+
+resolve_n_unitarios_nr(_,_,[],_):-!,false.%se chegamos ao fim devolve falso.
+
+resolve_n_unitarios_nr(Puz,Pos,[H_Cont|_],Sol):-
+        puzzle_muda_propaga(Puz,Pos,[H_Cont],Puz_Propaga),%vamos tentar escolher o primeiro, propagar a mudanca
+        resolve_inspeciona(Puz_Propaga,Puz_Inspecionado),%depois inspecionamos ate nao ser possivel mais
+        todas_posicoes(Todas_Posicoes),%vamos buscar todas as posicoes
+        resolve_n_unitarios(Puz_Inspecionado,Todas_Posicoes,Sol),%e vamos ver se existem mais nao unitarios
+        solucao(Sol),!.%se chegamos a uma solucao, retorna o valor e bloqueia o ramo
+
+resolve_n_unitarios_nr(Puz,Pos,[_|T_Cont],Sol):-%caso contrario
+        resolve_n_unitarios_nr(Puz,Pos,T_Cont,Sol).%tenta o proximo
+
+%%%
+resolve_inspeciona(Puz_Init,Puz_Insp):-
+        inspecciona(Puz_Init,Puz_Insp),%inspecciona
+        Puz_Init == Puz_Insp,!.%se os puzzles sao iguais, retorna o valor e pk ja inspecionou tudo, e bloqueia o ramo
+
+
+resolve_inspeciona(Puz_Init,N_Puz):-
+        inspecciona(Puz_Init,Puz_Insp),%inspecciona, se os puzzles sao differentes
+        resolve_inspeciona(Puz_Insp,N_Puz).%chama mais uma vez
